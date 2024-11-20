@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Troubleshooting Checklist</title>
+<style>
+    /* General styling */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    h1 {
+        text-align: center;
+        color: #4A90E2;
+    }
+
+    .container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        background-color: #f4f4f9;
+        border: 1px solid #ddd;
+        border-radius: 5px 5px 0 0;
+        margin-right: 5px;
+    }
+
+    .tab.active {
+        background-color: #ffffff;
+        border-bottom: 2px solid white;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: bold;
+        color: #4A90E2;
+    }
+
+    select, textarea, input {
+        width: calc(100% - 2px);
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-top: 5px;
+        font-size: 16px;
+    }
+
+    select {
+        cursor: pointer;
+    }
+
+    textarea {
+        resize: none;
+        background-color: #f9f9f9;
+    }
+
+    .text-area-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Styling for the result text areas */
+    textarea[readonly] {
+        background-color: #f0f8ff;
+        font-size: 15px;
+        font-family: Arial, sans-serif;
+        color: #333;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    #addDataTab {
+        width: calc(100% - 20px);
+    }
+    
+    #addSymptomTab { 
+        width: calc(100% - 20px);
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Troubleshooting Checklist for iPhone/iPad in AirWatch</h1>
+
+    <!-- Tabs for navigation -->
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('checklistTab')">Checklist</div>
+        <div class="tab" onclick="showTab('addDataTab')">Add New Data</div>
+        <div class="tab" onclick="showTab('addSymptomTab')">Add Symptom</div>
+    </div>
+
+    <!-- Tab content for Checklist -->
+    <div class="tab-content active" id="checklistTab">
+        <div class="form-group">
+            <label for="failurePoint">Failure Point</label>
+            <select id="failurePoint" onchange="updateSymptoms()">
+                <option value="">Select Failure Point</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="symptom">Symptom</label>
+            <select id="symptom" onchange="populateDetails()">
+                <option value="">Select Symptom</option>
+            </select>
+        </div>
+
+        <div class="text-area-container">
+            <div class="form-group">
+                <label for="correctiveSteps">Corrective Steps</label>
+                <textarea id="correctiveSteps" rows="4" readonly></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="cause">Cause</label>
+                <textarea id="cause" rows="2" readonly></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" rows="2" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab content for Add New Data -->
+    <div class="tab-content" id="addDataTab">
+        <h2>Add New Troubleshooting Data</h2>
+
+        <div class="form-group">
+            <label for="newFailurePoint">New Failure Point</label>
+            <input type="text" id="newFailurePoint" placeholder="Enter new failure point">
+        </div>
+
+        <div class="form-group">
+            <label for="newSymptom">New Symptom</label>
+            <input type="text" id="newSymptom" placeholder="Enter new symptom">
+        </div>
+
+        <div class="form-group">
+            <label for="newCause">New Cause</label>
+            <textarea id="newCause" rows="2" placeholder="Enter new cause"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="newCorrectiveSteps">New Corrective Steps</label>
+            <textarea id="newCorrectiveSteps" rows="4" placeholder="Enter new corrective steps"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="newNotes">New Notes</label>
+            <textarea id="newNotes" rows="2" placeholder="Enter new notes"></textarea>
+        </div>
+
+        <button onclick="addNewData()">Add New Data</button>
+    </div>
+
+    <!-- Tab content for Add Symptom -->
+    <div class="tab-content" id="addSymptomTab">
+        <h2>Add New Symptom to Existing Failure Point</h2>
+
+        <div class="form-group">
+            <label for="existingFailurePoint">Select Existing Failure Point</label>
+            <select id="existingFailurePoint">
+                <option value="">Select Failure Point</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="newSymptomForExisting">New Symptom</label>
+            <input type="text" id="newSymptomForExisting" placeholder="Enter new symptom">
+        </div>
+
+        <div class="form-group">
+            <label for="newCauseForExisting">New Cause</label>
+            <textarea id="newCauseForExisting" rows="2" placeholder="Enter new cause"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="newCorrectiveStepsForExisting">New Corrective Steps</label>
+            <textarea id="newCorrectiveStepsForExisting" rows="4" placeholder="Enter new corrective steps"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="newNotesForExisting">New Notes</label>
+            <textarea id="newNotesForExisting" rows="2" placeholder="Enter new notes"></textarea>
+        </div>
+
+        <button onclick="addSymptomToExistingFailurePoint()">Add Symptom</button>
+    </div>
+
+</div>
+
+<script>
+// Data structure holding troubleshooting information
+let troubleshootingData = {
+    "Re-enter Password": {
+        "Prompt to enter username is not given": {
+            "Cause": "Wrong username was entered",
+            "CorrectiveSteps": "Clear Safari 'History and Website Data' > Settings > Safari",
+            "Notes": "If the wrong username is entered and 'Remember this setting' is checked, prompt will not be given again."
+        },
+        "Error 'Enter message' is given after entering username": {
+            "Cause": "Request Desktop Website is turned On",
+            "CorrectiveSteps": "Turn 'All Websites' Off > Settings > Safari > Request Desktop Website",
+            "Notes": "For iPads, some iOS versions have this setting turned on by default. Must be turned off to access MyPaylinks."
+        },
+        "Microsoft Authenticator installed": {
+            "Cause": "Microsoft Authenticator is installed",
+            "CorrectiveSteps": "Airwatch console App tab, have user uninstall Authenticator that is not 'Managed'",
+            "Notes": "App can be re-installed after password is updated."
+        }
+    },
+    "Email not Syncing": {
+        "No new emails, Unable to connect to WiFi, Other apps may lose internet access": {
+            "Cause": "Device record in AW Console needs to be deleted for use by another user",
+            "CorrectiveSteps": "Reset Network Settings > Settings > General > Transfer or Reset iPhone > Reset > Reset Network Settings > Enter passcode > Reset Network Settings",
+            "Notes": "This problem is a result of a device switch."
+        }
+    }
+};
+
+// Function to show the active tab
+function showTab(tabId) {
+    const tabs = document.querySelectorAll(".tab");
+    const contents = document.querySelectorAll(".tab-content");
+
+    // Remove active class from all tabs and hide all content
+    tabs.forEach(tab => tab.classList.remove("active"));
+    contents.forEach(content => content.classList.remove("active"));
+
+    // Add active class to the selected tab and show the content
+    document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add("active");
+    document.getElementById(tabId).classList.add("active");
+}
+
+// Function to add new troubleshooting data
+function addNewData() {
+    const newFailurePoint = document.getElementById("newFailurePoint").value;
+    const newSymptom = document.getElementById("newSymptom").value;
+    const newCause = document.getElementById("newCause").value;
+    const newCorrectiveSteps = document.getElementById("newCorrectiveSteps").value;
+    const newNotes = document.getElementById("newNotes").value;
+
+    if (!newFailurePoint || !newSymptom || !newCause || !newCorrectiveSteps || !newNotes) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    if (!troubleshootingData[newFailurePoint]) {
+        troubleshootingData[newFailurePoint] = {};
+    }
+
+    troubleshootingData[newFailurePoint][newSymptom] = {
+        Cause: newCause,
+        CorrectiveSteps: newCorrectiveSteps,
+        Notes: newNotes
+    };
+
+    alert("New troubleshooting data added successfully!");
+
+    populateFailurePoints();
+    clearFields();
+}
+
+// Function to add symptom to an existing failure point
+function addSymptomToExistingFailurePoint() {
+    const existingFailurePoint = document.getElementById("existingFailurePoint").value;
+    const newSymptom = document.getElementById("newSymptomForExisting").value;
+    const newCause = document.getElementById("newCauseForExisting").value;
+    const newCorrectiveSteps = document.getElementById("newCorrectiveStepsForExisting").value;
+    const newNotes = document.getElementById("newNotesForExisting").value;
+
+    if (!existingFailurePoint || !newSymptom || !newCause || !newCorrectiveSteps || !newNotes) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    if (!troubleshootingData[existingFailurePoint]) {
+        alert("Selected failure point does not exist.");
+        return;
+    }
+
+    troubleshootingData[existingFailurePoint][newSymptom] = {
+        Cause: newCause,
+        CorrectiveSteps: newCorrectiveSteps,
+        Notes: newNotes
+    };
+
+    alert("New symptom added to existing failure point!");
+
+    populateFailurePoints();
+    clearFields();
+}
+
+// Function to populate failure points dropdown
+function populateFailurePoints() {
+    const failurePointSelect = document.getElementById("failurePoint");
+    const existingFailurePointSelect = document.getElementById("existingFailurePoint");
+
+    // Clear current options
+    failurePointSelect.innerHTML = '<option value="">Select Failure Point</option>';
+    existingFailurePointSelect.innerHTML = '<option value="">Select Failure Point</option>';
+
+    // Populate failure point dropdowns
+    for (const failurePoint in troubleshootingData) {
+        const option1 = document.createElement("option");
+        option1.value = failurePoint;
+        option1.textContent = failurePoint;
+        failurePointSelect.appendChild(option1);
+
+        const option2 = document.createElement("option");
+        option2.value = failurePoint;
+        option2.textContent = failurePoint;
+        existingFailurePointSelect.appendChild(option2);
+    }
+}
+
+// Function to update symptoms based on selected failure point
+function updateSymptoms() {
+    const failurePointSelect = document.getElementById("failurePoint");
+    const symptomSelect = document.getElementById("symptom");
+
+    const failurePoint = failurePointSelect.value;
+
+    // Clear symptoms dropdown and form details
+    symptomSelect.innerHTML = '<option value="">Select Symptom</option>';
+    clearFields();
+
+    // Populate symptoms if a valid failure point is selected
+    if (failurePoint && troubleshootingData[failurePoint]) {
+        for (const symptom in troubleshootingData[failurePoint]) {
+            const option = document.createElement("option");
+            option.value = symptom;
+            option.textContent = symptom;
+            symptomSelect.appendChild(option);
+        }
+    }
+}
+
+// Function to populate symptom details based on selection
+function populateDetails() {
+    const failurePointSelect = document.getElementById("failurePoint");
+    const symptomSelect = document.getElementById("symptom");
+
+    const failurePoint = failurePointSelect.value;
+    const symptom = symptomSelect.value;
+
+    const correctiveSteps = document.getElementById("correctiveSteps");
+    const cause = document.getElementById("cause");
+    const notes = document.getElementById("notes");
+
+    // Clear the form if no failure point or symptom is selected
+    if (!failurePoint || !symptom || !troubleshootingData[failurePoint] || !troubleshootingData[failurePoint][symptom]) {
+        clearFields();
+        return;
+    }
+
+    // Populate form details based on the selected symptom
+    const details = troubleshootingData[failurePoint][symptom];
+    correctiveSteps.value = details.CorrectiveSteps;
+    cause.value = details.Cause;
+    notes.value = details.Notes;
+}
+
+// Function to clear all fields
+function clearFields() {
+    document.getElementById("correctiveSteps").value = '';
+    document.getElementById("cause").value = '';
+    document.getElementById("notes").value = '';
+    document.getElementById("newFailurePoint").value = '';
+    document.getElementById("newSymptom").value = '';
+    document.getElementById("newCause").value = '';
+    document.getElementById("newCorrectiveSteps").value = '';
+    document.getElementById("newNotes").value = '';
+    document.getElementById("newSymptomForExisting").value = '';
+    document.getElementById("newCauseForExisting").value = '';
+    document.getElementById("newCorrectiveStepsForExisting").value = '';
+    document.getElementById("newNotesForExisting").value = '';
+}
+
+// Function to populate failure points dropdown
+function populateFailurePoints() {
+    const failurePointSelect = document.getElementById("failurePoint");
+    const existingFailurePointSelect = document.getElementById("existingFailurePoint");
+
+    // Clear current options
+    failurePointSelect.innerHTML = '<option value="">Select Failure Point</option>';
+    existingFailurePointSelect.innerHTML = '<option value="">Select Failure Point</option>';
+
+    // Populate failure point dropdowns
+    for (const failurePoint in troubleshootingData) {
+        const option1 = document.createElement("option");
+        option1.value = failurePoint;
+        option1.textContent = failurePoint;
+        failurePointSelect.appendChild(option1);
+
+        const option2 = document.createElement("option");
+        option2.value = failurePoint;
+        option2.textContent = failurePoint;
+        existingFailurePointSelect.appendChild(option2);
+    }
+}
+
+// Initialize failure points and clear fields on page load
+window.onload = function() {
+    populateFailurePoints();
+    clearFields();
+};
+</script>
+
+</body>
+</html>
